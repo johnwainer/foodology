@@ -4,6 +4,8 @@ const fetch = require("node-fetch");
 const serviceUrl = 'https://services.grability.rappi.com/api/restaurant-bus/stores/catalog/home/v2';
 const restaurantBasePosition = {'lat':3.4242814233739614, 'lng':-76.54170365914733};
 const usersPositions = [];
+let totalIndex = 0;
+let totalIndexItems = 0;
 
 usersPositions.push( {'lat':3.4329935, 'lng':-76.5293033} );
 usersPositions.push( {'lat':3.4215012, 'lng':-76.5550201} );
@@ -13,43 +15,46 @@ usersPositions.push( {'lat':3.3858673, 'lng':-76.5194594} );
 app.get('/', (req, res) => {
    
     for (let index = 0; index < usersPositions.length; index++) {
-        let url = serviceUrl; // + '?lng=' + usersPositions[index].lng + '&lat=' + usersPositions[index].lat + '&view=web';
-        console.log('-->', usersPositions[index])
-        getFetchData(url, usersPositions[index]);
-        
+        let url = serviceUrl;
+        getFetchData(url, usersPositions[index]);   
     }
+    setTimeout(() => {
+        console.log('Posición promedio: ', (totalIndex/totalIndexItems).toFixed(0));
+     }, 2000);
 });
 
 app.listen(8000, () => {
   console.log('Running')
 });
 
-getFetchData = function(url, userData){
+getFetchData = async function(url, userData){
     fetch(url, {
         headers: {
             'Content-Type': 'application/json',
-            'authorization': 'Bearer TGZjdmZHVm81UTJLTTJpM1ZmQ0hFT0puU2toYzFk'
+            'authorization': 'Bearer UHhuaTBLV2F6THp0b2E4dU9OWXlPYTdNN3FPN2ow'
           },
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        body: JSON.stringify({"lat":6.229207799999999,"lng":-75.5738344,"store_type":"restaurant","is_prime":false,"states":["opened","unavailable"]})
+        body: JSON.stringify({"lat":userData.lat,"lng":userData.lng,"store_type":"restaurant","is_prime":false,"states":["opened","unavailable"]})
          
     })
     .then(res => res.json())
     .then(data => {
+        //console.log(data)
         const jsonData = data;
         const distancebtw = getKms(restaurantBasePosition.lat, restaurantBasePosition.lng,userData.lat, userData.lng );
         console.log('Distancia con usuario:', distancebtw)
-        for(let x in jsonData){
-            //console.log('--->', jsonData.stores);
+        
             const resultStores = jsonData.stores;
 
-            const findedResults = resultStores.find(store => store.name === 'Romero'); // Utilicé romero, al no saber el nombre del restaurante de Foodology
-
-            console.log('Nombre restaurante: ' ,findedResults.name);
-            console.log('Distancia del restautante: ', findedResults.saturation.distance);
-            console.log('Está en la posición: ', findedResults.index);
-        }
-        return jsonData;
+            resultStores.forEach(function(store){
+                
+                if(store.name.toLowerCase().includes('salchiborondo')){ // Asumo el nombre del restaurante
+                    console.log('Nombre restaurante: ' ,store.name);
+                    console.log('Está en la posición: ', store.index);
+                    totalIndex = totalIndex + store.index;
+                    totalIndexItems++;
+                }                    
+            });        
     })
     .catch(err => {
     return err;
