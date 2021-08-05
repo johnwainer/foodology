@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
     }
     setTimeout(() => {
         console.log('Posición promedio: ', (totalIndex/totalIndexItems).toFixed(0));
-     }, 2000);
+     }, 4000);
 });
 
 app.listen(8000, () => {
@@ -31,7 +31,7 @@ getFetchData = async function(url, userData){
     fetch(url, {
         headers: {
             'Content-Type': 'application/json',
-            'authorization': 'Bearer UHhuaTBLV2F6THp0b2E4dU9OWXlPYTdNN3FPN2ow'
+            'authorization': 'Bearer ejNQWHh4MWVFYWhXZkpjNHJkVHFWMkh5T3paaTBB'
           },
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         body: JSON.stringify({"lat":userData.lat,"lng":userData.lng,"store_type":"restaurant","is_prime":false,"states":["opened","unavailable"]})
@@ -41,16 +41,18 @@ getFetchData = async function(url, userData){
     .then(data => {
         //console.log(data)
         const jsonData = data;
-        const distancebtw = getKms(restaurantBasePosition.lat, restaurantBasePosition.lng,userData.lat, userData.lng );
-        console.log('Distancia con usuario:', distancebtw)
+        
         
             const resultStores = jsonData.stores;
 
             resultStores.forEach(function(store){
                 
-                if(store.name.toLowerCase().includes('salchiborondo')){ // Asumo el nombre del restaurante
+                if(store.name.toLowerCase().includes('corral')){ // Asumo el nombre del restaurante
                     console.log('Nombre restaurante: ' ,store.name);
                     console.log('Está en la posición: ', store.index);
+                    const distancebtw = getKms(store.location[1], store.location[0],userData.lat, userData.lng );
+                    console.log('Distancia con usuario:', distancebtw + ' Kms');
+
                     totalIndex = totalIndex + store.index;
                     totalIndexItems++;
                 }                    
